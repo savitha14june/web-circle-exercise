@@ -8,6 +8,13 @@ import SearchField from "../components/SearchField/SearchField.jsx";
 
 const RestaurantView = () => {
   const [dishes, setDishes] = useState([]);
+  const [val, setVal] = useState([]);
+  
+  const change = (event) => {
+    const newVal = (event.target.value);
+    console.log(newVal);
+    setVal(newVal);
+  }
 
   // useDebouncedCallback takes a function as a parameter and as the second parameter
   // the number of milliseconds it should wait until it is actually called so a user
@@ -21,6 +28,18 @@ const RestaurantView = () => {
       if (!res.ok) {
         return { meals: null };
       }
+      console.log("RESULTS:");
+      console.log(val);
+      const filtered = res.json().then((data) =>  {
+        console.log(data.meals);
+        const fList = data.meals.filter((item) => {
+          return item.strMeal.toLowerCase().indexOf(val) !== -1;
+        })
+        console.log(fList);
+        setDishes(fList);
+      } 
+     );
+      
       return res.json();
     }).then(result => {
       if (!currentEffect) {
@@ -35,6 +54,7 @@ const RestaurantView = () => {
       }
       setDishes([]);
     })
+
 
     // This cleanup function is to prevent multiple API calls coming back out of sequence and setting the value of our dishes list.
     // Example:
@@ -56,7 +76,15 @@ const RestaurantView = () => {
       <NavBar>
         <h1>ReDI React Restaurant</h1>
 
-        <SearchField />
+        
+        <input
+        placeholder="Filter dishes"
+        type="text"  
+        value={val} 
+        onChange={change}
+      />
+        
+        <button onClick={debouncedEffectHook} >Click for search results</button>
       </NavBar>
 
       <div className={styles.restaurantWrapper}>
